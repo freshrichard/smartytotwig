@@ -21,16 +21,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
+import fileinput
+from smartytotwig.smarty_grammar import smarty_language, comment
+from smartytotwig.pyPEG import parse
 
-def parse_string(template_string):
+def parse_file(file_name, language=smarty_language):
     """
     """
-    print template_string
-
-def parse_file(file_name):
-    """
-    """
-    file = open(file_name, 'r')
-    parse_string(file.read())
-    file.close()
-    
+    file_input = fileinput.FileInput(file_name)
+    return parse(language, file_input, True, comment)
