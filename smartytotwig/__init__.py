@@ -22,11 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 import fileinput
-from smartytotwig.smarty_grammar import smarty_language, comment
+from smartytotwig.smarty_grammar import smarty_language
 from smartytotwig.pyPEG import parse
 
 def parse_file(file_name, language=smarty_language):
     """
     """
     file_input = fileinput.FileInput(file_name)
-    return parse(language, file_input, True, comment)
+    return parse(language, file_input, True)

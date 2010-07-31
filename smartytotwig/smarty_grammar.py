@@ -47,8 +47,6 @@ from smartytotwig.pyPEG import keyword, _and, _not, ignore
 """
 Misc.
 """
-def comment():              return [re.compile(r'//.*'), re.compile('/\*.*?\*/', re.S)]
-
 def content():              return re.compile(r'[^{]+')
 
 """
@@ -61,21 +59,26 @@ def operator():             return [and_operator]
 """
 Smarty variables.
 """
+def string():               return [re.compile(r'"[^"]+"'), re.compile(r'\'[^\']+\'')]
 
-def symbol():               return re.compile(r'\$\w+')
+def symbol():               return re.compile(r'\$?\w+')
 
-def array():                return symbol(), array_dereference
+def array():                return symbol, array_dereference
 
 def array_dereference():    return "[", 0, expression, "]"
 
-def expression():           return [array, symbol]
+def expression():           return [object_dereference, array, symbol, string]
+
+def object_dereference():   return [array, symbol], '.', expression
 
 """
 Smarty statements.
 """
-def if_statement():         return '{', keyword('if'), expression, -1, (operator, expression), '}', '{/', keyword('if'), '}'
+def if_statement():         return '{', keyword('if'), expression, -1, (operator, expression), '}', -1, smarty_language, '{/', keyword('if'), '}'
+
+def modifier_statement():   return '{', expression, '|', symbol, -1, (':', expression), '}'
 
 """
 Finally, the actual language description.
 """
-def smarty_language():      return -2, [if_statement, content]
+def smarty_language():      return -2, [modifier_statement, if_statement, content]

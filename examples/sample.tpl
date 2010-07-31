@@ -1,14 +1,7 @@
+{$entry.EntryDate|date_format:"%e %b, %Y %H:%M:%S"}
 
-
-{if $foobar[$foobar[$foobar]] and $test and $test and $test}
-{/if}
-
-{if $foobar[$foobar[$foobar]]}
-{/if}
-
-{if $foobar}
-{/if}
-
+{if $foo[$bar].foobar[$five].foo.bar and bar}
 <html>
-	<awesome>Foo</awesome>
+	<b>hey</b>
 </html>
+{/if}
