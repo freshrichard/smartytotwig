@@ -42,18 +42,72 @@ class TreeWalker(object):
         """
         """
 
-        print ast
-
         code = self.__walk_tree (
             {
                 'if_statement': self.if_statement,
-                'content': self.content
+                'content': self.content,
+                'modifier_statement': self.modifier_statement
             },
             ast,
             code,
             tab_depth
         )
             
+        return code
+        
+    def modifier_statement(self, ast, code, tab_depth):
+        """
+        """
+        code = "%s%s{{" % (
+            code,
+            self.__print_tabs(tab_depth)
+        )
+                
+        # Walking the expression that starts a
+        # modifier statement.
+        code = self.__walk_tree (
+            {
+                'expression': self.expression,
+                'modifier_right': self.modifier_right
+            },
+            ast,
+            code,
+            tab_depth
+        )
+        
+        code = "%s}}\n" % code
+        return code
+        
+    def modifier_right(self, ast, code, tab_depth):
+        """
+        """
+        code = "%s|" % code
+                
+        code = self.__walk_tree (
+            {
+                'symbol': self.symbol,
+                'string': self.string
+            },
+            ast,
+            code,
+            tab_depth
+        )
+        
+        # We must have parameters being passed
+        # in to the modifier.
+        if len(ast) > 1:
+            code = "%s(" % code
+            i = 0
+            for k, v in ast[1:]:
+                code = self.expression(v, code, tab_depth)
+                
+                # Put commas in if needed.
+                i += 1
+                if not i == len(ast) - 1:
+                    code = "%s, " % code
+                    
+            code = "%s)" % code
+        
         return code
         
     def content(self, ast, code, tab_depth):
@@ -63,6 +117,7 @@ class TreeWalker(object):
             code,
             ast
         )
+        
         return code
                 
     def if_statement(self, ast, code, tab_depth):
@@ -163,9 +218,7 @@ class TreeWalker(object):
     def else_statement(self, ast, code, tab_depth):
         """
         """
-        """
-        
-        """        
+             
         code = "%s%s{%s else %s}\n" % (
             code,
             self.__print_tabs(tab_depth),
@@ -228,7 +281,9 @@ class TreeWalker(object):
         code = self.__walk_tree (
             {
                 'symbol': self.symbol,
-                'object_dereference': self.object_dereference
+                'string': self.string,
+                'object_dereference': self.object_dereference,
+                'array': self.array,
             },
             ast,
             code,
@@ -242,7 +297,9 @@ class TreeWalker(object):
         """
         handlers = {
             'expression': self.expression,
-            'symbol': self.symbol
+            'symbol': self.symbol,
+            'string': self.string,
+            'array': self.array
         }
         
         code = handlers[ast[0][0]](ast[0][1], code, tab_depth)
@@ -253,6 +310,30 @@ class TreeWalker(object):
         )
         
         return code
+        
+    def array(self, ast, code, tab_depth):
+        """
+        """
+        handlers = {
+            'expression': self.expression,
+            'array': self.array,
+            'symbol': self.symbol,
+            'string': self.string
+        }
+
+        code = handlers[ast[0][0]](ast[0][1], code, tab_depth)
+
+        code = "%s[%s]" % (
+            code, 
+            handlers[ast[1][0]](ast[1][1], "", tab_depth)
+        )
+
+        return code
+    
+    def string(self, ast, code, tab_depth):
+        """
+        """
+        return "%s%s" % (code, ast[0])
         
     def symbol(self, ast, code, tab_depth):
         """

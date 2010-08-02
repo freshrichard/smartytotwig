@@ -49,9 +49,7 @@ def dollar():               return '$'
 
 def symbol():               return 0, dollar, re.compile(r'\w+')
 
-def array():                return symbol, array_dereference
-
-def array_dereference():    return "[", 0, expression, "]"
+def array():                return symbol, "[", 0, expression, "]"
 
 def expression():           return [object_dereference, array, symbol, string]
 
@@ -66,7 +64,9 @@ def if_statement():         return '{', keyword('if'), expression, -1, (operator
 
 def elseif_statement():     return '{', keyword('elseif'), expression, -1, (operator, expression), '}', -1, smarty_language, 0, ('{/', keyword('if'), '}')
 
-def modifier_statement():   return '{', expression, -2, ('|', symbol, -1, (':', expression), ), '}'
+def modifier_right():    return ('|', symbol, -1, (':', expression), )
+
+def modifier_statement():   return '{', expression, -2, modifier_right, '}'
 
 """
 Finally, the actual language description.
