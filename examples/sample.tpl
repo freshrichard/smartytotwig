@@ -1,7 +1,1 @@
-{$entry.EntryDate|date_format:"%e %b, %Y %H:%M:%S"}
-
-{if $foo[$bar].foobar[$five].foo.bar and bar}
-<html>
-	<b>hey</b>
-</html>
-{/if}
+{$entry.Name[3].apple|escape:'foo':$bar|title:9}

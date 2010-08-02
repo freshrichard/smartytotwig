@@ -26,24 +26,6 @@ import re
 from smartytotwig.pyPEG import parse
 from smartytotwig.pyPEG import keyword, _and, _not, ignore
 
-# pyPEG:
-#
-#   basestring:     terminal symbol (characters)
-#   keyword:        terminal symbol (keyword)
-#   matchobj:       terminal symbols (regex, use for scanning symbols)
-#   function:       named non-terminal symbol, recursive definition
-#                   if you don't want naming in output, precede name with an underscore
-#   tuple:          production sequence
-#   integer:        count in production sequence:
-#                    0: following element is optional
-#                   -1: following element can be omitted or repeated endless
-#                   -2: following element is required and can be repeated endless
-#   list:           options, choose one of them
-#   _not:           next element in production sequence is matched only if this would not
-#   _and:           next element in production sequence is matched only if this would, too
-
-# comment <- r"//.*" | r"/\*.**?\*/";
-
 """
 Misc.
 """
@@ -54,14 +36,18 @@ Logical operators.
 """
 def and_operator():         return [keyword('and'), '&&']
 
-def operator():             return [and_operator]
+def equals_operator():      return [keyword('=='), 'eq']
+
+def operator():             return [and_operator, equals_operator]
 
 """
 Smarty variables.
 """
 def string():               return [re.compile(r'"[^"]+"'), re.compile(r'\'[^\']+\'')]
 
-def symbol():               return re.compile(r'\$?\w+')
+def dollar():               return '$'
+
+def symbol():               return 0, dollar, re.compile(r'\w+')
 
 def array():                return symbol, array_dereference
 
@@ -74,9 +60,13 @@ def object_dereference():   return [array, symbol], '.', expression
 """
 Smarty statements.
 """
-def if_statement():         return '{', keyword('if'), expression, -1, (operator, expression), '}', -1, smarty_language, '{/', keyword('if'), '}'
+def else_statement():       return '{', keyword('else'), '}', -1, smarty_language
 
-def modifier_statement():   return '{', expression, '|', symbol, -1, (':', expression), '}'
+def if_statement():         return '{', keyword('if'), expression, -1, (operator, expression), '}', -1, smarty_language, -1, [else_statement, elseif_statement], '{/', keyword('if'), '}'
+
+def elseif_statement():     return '{', keyword('elseif'), expression, -1, (operator, expression), '}', -1, smarty_language, 0, ('{/', keyword('if'), '}')
+
+def modifier_statement():   return '{', expression, -2, ('|', symbol, -1, (':', expression), ), '}'
 
 """
 Finally, the actual language description.
