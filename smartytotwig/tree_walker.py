@@ -35,7 +35,7 @@ class TreeWalker(object):
         
         # Top level handler for walking the tree.
         self.code = self.smarty_language(ast, '', 0)
-                
+        print ast
         print self.code
         
     def smarty_language(self, ast, code, tab_depth):
@@ -46,7 +46,8 @@ class TreeWalker(object):
             {
                 'if_statement': self.if_statement,
                 'content': self.content,
-                'modifier_statement': self.modifier_statement
+                'print_statement': self.print_statement,
+                'for_statement': self.for_statement
             },
             ast,
             code,
@@ -55,7 +56,7 @@ class TreeWalker(object):
             
         return code
         
-    def modifier_statement(self, ast, code, tab_depth):
+    def print_statement(self, ast, code, tab_depth):
         """
         """
         code = "%s%s{{" % (
@@ -68,7 +69,6 @@ class TreeWalker(object):
         code = self.__walk_tree (
             {
                 'expression': self.expression,
-                'modifier_right': self.modifier_right
             },
             ast,
             code,
@@ -77,6 +77,25 @@ class TreeWalker(object):
         
         code = "%s}}\n" % code
         return code
+        
+    def modifier(self, ast, code, tab_depth):
+        """
+        """
+                
+        # Walking the expression that starts a
+        # modifier statement.
+        code = self.__walk_tree (
+            {
+                'symbol': self.symbol,
+                'string': self.string,
+                'modifier_right': self.modifier_right,
+            },
+            ast,
+            code,
+            tab_depth
+        )
+        
+        return code        
         
     def modifier_right(self, ast, code, tab_depth):
         """
@@ -119,6 +138,81 @@ class TreeWalker(object):
         )
         
         return code
+        
+    def for_statement(self, ast, code, tab_depth):
+        """
+
+        """ 
+
+        code = "%s%s{%s for " % (
+            code,
+            self.__print_tabs(tab_depth),
+            '%'
+        )
+        
+        for_parts = {}
+        for k, v in ast:
+            for_parts[k] = v
+        
+        # What variable is the for data being stored as.
+        if for_parts.has_key('for_item'):
+            code = self.__walk_tree (
+                {
+                    'symbol': self.symbol,
+                },
+                for_parts['for_item'],
+                code,
+                tab_depth
+            )
+            code = "%s " % code
+        
+        # What is the for statement reading from?
+        if for_parts.has_key('for_from'):
+            code = "%sin " % code
+            code = self.__walk_tree (
+                {
+                    'expression': self.expression,
+                },
+                for_parts['for_from'],
+                code,
+                tab_depth
+            )
+        
+        code = "%s %s}\n" % (
+            code,
+            '%'
+        )
+
+        # The content inside the if statement.
+        code = self.__walk_tree (
+            {
+                'smarty_language': self.smarty_language,
+            },
+            ast,
+            code,
+            tab_depth + 1
+        )
+
+        # Else and elseif statements.
+        code = self.__walk_tree (
+            {
+                'elseif_statement': self.elseif_statement,
+                'else_statement': self.else_statement
+            },
+            ast,
+            code,
+            tab_depth
+        )
+
+        code = '%s%s{%s endfor %s}\n' % (
+            code,
+            self.__print_tabs(tab_depth),
+            '%',
+            '%'
+        )
+
+        return code
+
                 
     def if_statement(self, ast, code, tab_depth):
         """
@@ -284,6 +378,7 @@ class TreeWalker(object):
                 'string': self.string,
                 'object_dereference': self.object_dereference,
                 'array': self.array,
+                'modifier': self.modifier
             },
             ast,
             code,
