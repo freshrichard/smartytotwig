@@ -35,7 +35,6 @@ class TreeWalker(object):
         
         # Top level handler for walking the tree.
         self.code = self.smarty_language(ast, '', 0)
-        print ast
         print self.code
         
     def smarty_language(self, ast, code, tab_depth):
@@ -47,13 +46,77 @@ class TreeWalker(object):
                 'if_statement': self.if_statement,
                 'content': self.content,
                 'print_statement': self.print_statement,
-                'for_statement': self.for_statement
+                'for_statement': self.for_statement,
+                'function_statement': self.function_statement
             },
             ast,
             code,
             tab_depth
         )
             
+        return code
+    
+    def function_statement(self, ast, code, tab_depth):
+        """
+        """
+        
+        # The variable that starts a function statement.
+        function_name = self.__walk_tree (
+            {
+                'symbol': self.symbol
+            },
+            ast,
+            "",
+            tab_depth
+        )
+        
+        # Cycle through the function_parameters and store them
+        # these will be passed into the modifier as a dictionary.
+        function_params = {}
+        for k, v in ast[1:]:
+            symbol = self.__walk_tree (
+                {
+                    'symbol': self.symbol
+                },
+                v,
+                "",
+                0
+            )
+            
+            expression = self.__walk_tree (
+                {
+                    'expression': self.expression
+                },
+                v,
+                "",
+                0
+            )
+            
+            function_params[symbol] = expression
+            
+        # Now create a dictionary string from the paramters.
+        function_params_string = '['
+        i = 0
+        size = len(function_params.items())
+        print size
+        for k, v in function_params.items():
+            function_params_string = "%s'%s': %s" % (
+                function_params_string,
+                k,
+                v
+            )
+            
+            i += 1
+            if not i == size:
+                function_params_string = "%s, " % function_params_string
+                
+        function_params_string = "%s]" % function_params_string
+        
+        code = "%s{{%s|%s}}\n" % (
+            code,
+            function_params_string,
+            function_name
+        )
         return code
         
     def print_statement(self, ast, code, tab_depth):

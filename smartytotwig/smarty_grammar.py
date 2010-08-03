@@ -74,7 +74,9 @@ def elseif_statement():     return '{', keyword('elseif'), expression, -1, (oper
 
 def print_statement():      return '{', expression, '}'
 
-def function_statement():   return '{', symbol, -2, (symbol, '=', expression), '}'
+def function_parameter():   return symbol, '=', expression
+
+def function_statement():   return '{', symbol, -2, function_parameter, '}'
 
 def for_from():             return keyword('from'), '=', expression
 
