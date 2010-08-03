@@ -31,33 +31,55 @@ Misc.
 """
 def content():              return re.compile(r'[^{]+')
 
+def comment():              return re.compile("{\*.*?\*}", re.S)
+
+def literal():              return '{', keyword('literal'), '}', re.compile(".*{/literal}", re.S)
+
 """
 Logical operators.
 """
 def and_operator():         return [keyword('and'), '&&']
 
+def or_operator():          return [keyword('or'), '||']
+
 def equals_operator():      return ['==', keyword('eq')]
 
-def operator():             return [and_operator, equals_operator]
+def ne_operator():          return ['!=', keyword('ne'), keyword('neq')]
+
+def gt_operator():          return ['>', 'gt']
+
+def lt_operator():          return ['<', 'gt']
+
+def lte_operator():         return ['<=']
+
+def gte_operator():         return ['>=']
+
+def operator():             return [and_operator, equals_operator, gte_operator, lte_operator, lt_operator, gt_operator, ne_operator, or_operator]
 
 """
 Smarty variables.
 """
-def string():               return [re.compile(r'"[^"]+"'), re.compile(r'\'[^\']+\'')]
+def string():               return [re.compile(r'"[^"$]*"'), re.compile(r'\'[^\']*\'')]
+
+def text():                 return re.compile(r'[^"$`]+')
+
+def variable_string():      return ['\'', '"'], -2, [text, ('`', expression, '`'), ('$', expression)], ['\'', '"']
 
 def dollar():               return '$'
 
-def symbol():               return 0, dollar, re.compile(r'[\w\-\+]+')
+def not_operator():         return '!'
+
+def symbol():               return 0, not_operator, 0, dollar, re.compile(r'[\w\-\+]+')
 
 def array():                return symbol, "[", 0, expression, "]"
 
-def modifier():             return [symbol, object_dereference, array, string], -2, modifier_right
+def modifier():             return [symbol, object_dereference, array, string, variable_string], -2, modifier_right
 
-def expression():           return [object_dereference, array, modifier, symbol, string]
+def expression():           return [object_dereference, array, modifier, symbol, string, variable_string]
 
 def object_dereference():   return [array, symbol], '.', expression
 
-def exp_no_modifier():      return [symbol, object_dereference, array, string]
+def exp_no_modifier():      return [symbol, object_dereference, array, string, variable_string]
 
 def modifier_right():       return ('|', symbol, -1, (':', exp_no_modifier), )
 
@@ -70,21 +92,25 @@ def foreachelse_statement():return '{', keyword('foreachelse'), '}', -1, smarty_
 
 def if_statement():         return '{', keyword('if'), expression, -1, (operator, expression), '}', -1, smarty_language, -1, [else_statement, elseif_statement], '{/', keyword('if'), '}'
 
-def elseif_statement():     return '{', keyword('elseif'), expression, -1, (operator, expression), '}', -1, smarty_language, 0, ('{/', keyword('if'), '}')
+def elseif_statement():     return '{', keyword('elseif'), expression, -1, (operator, expression), '}', -1, smarty_language
 
-def print_statement():      return '{', expression, '}'
+def print_statement():      return '{', 0, 'e ', '$', expression, '}'
 
 def function_parameter():   return symbol, '=', expression
 
 def function_statement():   return '{', symbol, -2, function_parameter, '}'
 
-def for_from():             return keyword('from'), '=', expression
+def for_from():             return keyword('from'), '=', 0, ['"', '\''], expression, 0, ['"', '\'']
 
-def for_item():             return keyword('item'), '=', '"', symbol, '"'
+def for_item():             return keyword('item'), '=', 0, ['"', '\''], symbol, 0, ['"', '\'']
 
-def for_statement():        return '{', keyword('foreach'), -1, [for_from, for_item], '}', -1, smarty_language, -1, foreachelse_statement, '{/', keyword('foreach'), '}'
+def for_name():             return keyword('name'), '=', 0, ['"', '\''], symbol, 0, ['"', '\'']
+
+def for_key():              return keyword('key'), '=', 0, ['"', '\''], symbol, 0, ['"', '\'']
+
+def for_statement():        return '{', keyword('foreach'), -1, [for_from, for_item, for_name, for_key], '}', -1, smarty_language, 0, foreachelse_statement, '{/', keyword('foreach'), '}'
 
 """
 Finally, the actual language description.
 """
-def smarty_language():      return -2, [print_statement, if_statement, for_statement, function_statement, content]
+def smarty_language():      return -2, [variable_string, if_statement, for_statement, function_statement, comment, literal, print_statement, content]
