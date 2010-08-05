@@ -29,4 +29,4 @@ def parse_file(file_name, language=smarty_language):
     """
     """
     file_input = fileinput.FileInput(file_name)
-    return parse(language, file_input, True)
+    return parse(language, file_input, False)

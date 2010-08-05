@@ -54,22 +54,24 @@ def lte_operator():         return ['<=']
 
 def gte_operator():         return ['>=']
 
-def operator():             return [and_operator, equals_operator, gte_operator, lte_operator, lt_operator, gt_operator, ne_operator, or_operator]
+def operator():             return 0, ' ', [and_operator, equals_operator, gte_operator, lte_operator, lt_operator, gt_operator, ne_operator, or_operator]
 
 """
 Smarty variables.
 """
-def string():               return [re.compile(r'"[^"$]*"'), re.compile(r'\'[^\']*\'')]
+def string():               return 0, ' ', re.compile(r'([\'"])([^$]*)\1')
 
-def text():                 return re.compile(r'[^"$`]+')
+def text():                 return re.compile(r'[^"$`{]+')
 
-def variable_string():      return ['\'', '"'], -2, [text, ('`', expression, '`'), ('$', expression)], ['\'', '"']
+#def text():                 return re.compile(r'([^$+)(?<!\\)"')
+
+def variable_string():      return [('"', -2, [text, ('`', expression, '`'), ('$', expression)], '"'), ('\'', -2, [text, ('`', expression, '`'), ('$', expression)], '\'')]
 
 def dollar():               return '$'
 
 def not_operator():         return '!'
 
-def symbol():               return 0, not_operator, 0, dollar, re.compile(r'[\w\-\+]+')
+def symbol():               return 0, ' ', 0, not_operator, 0, dollar, re.compile(r'[\w\-\+]+'), 0, ' '
 
 def array():                return symbol, "[", 0, expression, "]"
 
@@ -90,27 +92,27 @@ def else_statement():       return '{', keyword('else'), '}', -1, smarty_languag
 
 def foreachelse_statement():return '{', keyword('foreachelse'), '}', -1, smarty_language
 
-def if_statement():         return '{', keyword('if'), expression, -1, (operator, expression), '}', -1, smarty_language, -1, [else_statement, elseif_statement], '{/', keyword('if'), '}'
-
-def elseif_statement():     return '{', keyword('elseif'), expression, -1, (operator, expression), '}', -1, smarty_language
-
-def print_statement():      return '{', 0, 'e ', '$', expression, '}'
+def print_statement():      return '{', 0, 'e ', expression, '}'
 
 def function_parameter():   return symbol, '=', expression
 
 def function_statement():   return '{', symbol, -2, function_parameter, '}'
 
-def for_from():             return keyword('from'), '=', 0, ['"', '\''], expression, 0, ['"', '\'']
+def for_from():             return 0, ' ', keyword('from'), '=', 0, ['"', '\''], expression, 0, ['"', '\'']
 
-def for_item():             return keyword('item'), '=', 0, ['"', '\''], symbol, 0, ['"', '\'']
+def for_item():             return 0, ' ', keyword('item'), '=', 0, ['"', '\''], symbol, 0, ['"', '\'']
 
-def for_name():             return keyword('name'), '=', 0, ['"', '\''], symbol, 0, ['"', '\'']
+def for_name():             return 0, ' ', keyword('name'), '=', 0, ['"', '\''], symbol, 0, ['"', '\'']
 
-def for_key():              return keyword('key'), '=', 0, ['"', '\''], symbol, 0, ['"', '\'']
+def for_key():              return 0, ' ', keyword('key'), '=', 0, ['"', '\''], symbol, 0, ['"', '\'']
+
+def elseif_statement():     return '{', keyword('elseif'), expression, -1, (operator, expression), '}', -1, smarty_language
+
+def if_statement():         return '{', keyword('if'), expression, -1, (operator, expression), '}', -1, smarty_language, -1, [else_statement, elseif_statement], '{/', keyword('if'), '}'
 
 def for_statement():        return '{', keyword('foreach'), -1, [for_from, for_item, for_name, for_key], '}', -1, smarty_language, 0, foreachelse_statement, '{/', keyword('foreach'), '}'
 
 """
 Finally, the actual language description.
 """
-def smarty_language():      return -2, [variable_string, if_statement, for_statement, function_statement, comment, literal, print_statement, content]
+def smarty_language():      return -2, [if_statement, for_statement, function_statement, comment, literal, print_statement, content]
