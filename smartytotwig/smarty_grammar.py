@@ -59,13 +59,11 @@ def operator():             return 0, ' ', [and_operator, equals_operator, gte_o
 """
 Smarty variables.
 """
-def string():               return 0, ' ', re.compile(r'([\'"])([^$]*)\1')
+def string():               return 0, ' ', [(re.compile(r'"'), -1, [re.compile(r'[^$`"\\]'), re.compile(r'\\.')], re.compile(r'"')), (re.compile(r'\''), -1, [re.compile(r'[^\'\\]'), re.compile(r'\\.')], re.compile(r'\''))]
 
-def text():                 return re.compile(r'[^"$`{]+')
+def text():                 return -2, [re.compile(r'[^$`"\\]'), re.compile(r'\\.')]
 
-#def text():                 return re.compile(r'([^$+)(?<!\\)"')
-
-def variable_string():      return [('"', -2, [text, ('`', expression, '`'), ('$', expression)], '"'), ('\'', -2, [text, ('`', expression, '`'), ('$', expression)], '\'')]
+def variable_string():      return '"', -2, [text, ('`', expression, '`'), ('$', expression)], '"'
 
 def dollar():               return '$'
 
@@ -75,7 +73,7 @@ def symbol():               return 0, ' ', 0, not_operator, 0, dollar, re.compil
 
 def array():                return symbol, "[", 0, expression, "]"
 
-def modifier():             return [symbol, object_dereference, array, string, variable_string], -2, modifier_right
+def modifier():             return [symbol, object_dereference, array, string, variable_string], -2, modifier_right, 0, ' '
 
 def expression():           return [object_dereference, array, modifier, symbol, string, variable_string]
 
@@ -94,7 +92,7 @@ def foreachelse_statement():return '{', keyword('foreachelse'), '}', -1, smarty_
 
 def print_statement():      return '{', 0, 'e ', expression, '}'
 
-def function_parameter():   return symbol, '=', expression
+def function_parameter():   return symbol, '=', expression, 0, ' '
 
 def function_statement():   return '{', symbol, -2, function_parameter, '}'
 

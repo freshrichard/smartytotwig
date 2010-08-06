@@ -60,8 +60,6 @@ class TreeWalker(object):
         statements.
         """
         
-        print ast
-        
         code = self.__walk_tree (
             {
                 'if_statement': self.if_statement,
@@ -70,7 +68,7 @@ class TreeWalker(object):
                 'for_statement': self.for_statement,
                 'function_statement': self.function_statement,
                 'comment': self.function_statement,
-                'literal': self.literal,
+                'literal': self.literal
             },
             ast,
             code
@@ -114,10 +112,13 @@ class TreeWalker(object):
             
             # Plain-text.
             if k == 'text':
-                string_contents = "%s%s" % (
-                    string_contents,
-                    v
-                )
+                for text in v:
+                
+                    string_contents = "%s%s" % (
+                        string_contents,
+                        text
+                    )
+                
             else: # An exprssion.
                 string_contents = "%s%s " % (
                     string_contents,
@@ -654,7 +655,7 @@ class TreeWalker(object):
     def string(self, ast, code):
         """
         """
-        return "%s%s" % (code, ast[0])
+        return "%s%s" % (code, ''.join(ast))
         
     def symbol(self, ast, code):
         """
