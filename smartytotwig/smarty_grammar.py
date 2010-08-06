@@ -73,15 +73,15 @@ def symbol():               return re.compile(r'[ \n\s]*'), 0, not_operator, 0, 
 
 def array():                return symbol, "[", 0, expression, "]"
 
-def modifier():             return [symbol, object_dereference, array, string, variable_string], -2, modifier_right, 0, ' '
+def modifier():             return [object_dereference, array, symbol, variable_string, string], -2, modifier_right, 0, ' '
 
-def expression():           return [object_dereference, array, modifier, symbol, string, variable_string]
+def expression():           return [modifier, object_dereference, array, symbol, string, variable_string]
 
 def object_dereference():   return [array, symbol], '.', expression
 
-def exp_no_modifier():      return [symbol, object_dereference, array, string, variable_string]
+def exp_no_modifier():      return [object_dereference, array, symbol, variable_string, string]
 
-def modifier_right():       return ('|', symbol, -1, (':', exp_no_modifier), )
+def modifier_right():       return ('|', symbol, -1, (':', exp_no_modifier),)
 
 """
 Smarty statements.

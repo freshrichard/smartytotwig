@@ -48,7 +48,7 @@ class TreeWalker(object):
         """
         The AST structure is created by pyPEG.
         """
-                
+        
         # Top level handler for walking the tree.
         self.code = self.smarty_language(ast, '')        
                 
@@ -257,6 +257,7 @@ class TreeWalker(object):
         code = self.__walk_tree (
             {
                 'symbol': self.symbol,
+                'array': self.array,
                 'string': self.string,
                 'variable_string': self.variable_string,
                 'modifier_right': self.modifier_right
