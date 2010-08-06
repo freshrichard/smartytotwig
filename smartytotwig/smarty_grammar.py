@@ -69,7 +69,7 @@ def dollar():               return '$'
 
 def not_operator():         return '!'
 
-def symbol():               return 0, ' ', 0, not_operator, 0, dollar, re.compile(r'[\w\-\+]+'), 0, ' '
+def symbol():               return re.compile(r'[ \n\s]*'), 0, not_operator, 0, dollar, re.compile(r'[\w\-\+]+')
 
 def array():                return symbol, "[", 0, expression, "]"
 

@@ -48,11 +48,10 @@ class TreeWalker(object):
         """
         The AST structure is created by pyPEG.
         """
-        
+                
         # Top level handler for walking the tree.
-        self.code = self.smarty_language(ast, '')
-        print self.code
-        
+        self.code = self.smarty_language(ast, '')        
+                
     def smarty_language(self, ast, code):
         """
         The entry-point for the parser.
@@ -120,7 +119,7 @@ class TreeWalker(object):
                     )
                 
             else: # An exprssion.
-                string_contents = "%s%s " % (
+                string_contents = "%s%s" % (
                     string_contents,
                     '%s'
                 )
