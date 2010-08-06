@@ -152,17 +152,24 @@ class TreeWalker(object):
         #   "%s text %s"|format(foo, bar)
         #
         # format is a Twig modifier similar to sprintf.
-        code = "%s%s\"|format(%s)" % (
-            code,
-            string_contents,
-            function_params_string
-        )
+        if len(function_params_string):
+            code = "%s%s\"|format(%s)" % (
+                code,
+                string_contents,
+                function_params_string
+            )
+        else: # Deal with parsing error on double-quoted strings.
+            code = "%s%s\"" % (
+                code,
+                string_contents
+            )
         
         return code
     
     def function_statement(self, ast, code):
         """
-        Smarty functions are mapped to a 
+        Smarty functions are mapped to a modifier in
+        Twig with a hash as input.
         """
         
         # The variable that starts a function statement.
@@ -222,6 +229,10 @@ class TreeWalker(object):
         
     def print_statement(self, ast, code):
         """
+        A print statement in smarty includes:
+        
+        {foo}
+        {foo|bar:parameter}
         """
                         
         # Walking the expression that starts a
@@ -250,6 +261,9 @@ class TreeWalker(object):
         
     def modifier(self, ast, code):
         """
+        A modifier statement:
+        
+        foo|bar:a:b:c
         """
                 
         # Walking the expression that starts a
@@ -270,6 +284,10 @@ class TreeWalker(object):
         
     def modifier_right(self, ast, code):
         """
+        The right-hand side of the modifier
+        statement:
+        
+        bar:a:b:c
         """
         code = "%s|" % code
                 
@@ -302,6 +320,13 @@ class TreeWalker(object):
         
     def content(self, ast, code):
         """
+        Raw content, e.g.,
+        
+        <html>
+            <body>
+                <b>Hey</b>
+            </body>
+        </html>
         """
         code = "%s%s" % (
             code,
@@ -312,7 +337,11 @@ class TreeWalker(object):
         
     def for_statement(self, ast, code):
         """
-
+        A foreach statement in smarty:
+        
+        {foreach from=expression item=foo}
+        {foreachelse}
+        {/foreach}
         """ 
 
         code = "%s{%s for " % (
@@ -380,7 +409,12 @@ class TreeWalker(object):
                 
     def if_statement(self, ast, code):
         """
+        An if statement in smarty:
         
+        {if expression (operator expression)}
+        {elseif expression (operator expression)}
+        {else}
+        {/if}
         """ 
                    
         code = "%s{%s if " % (
@@ -432,7 +466,11 @@ class TreeWalker(object):
         
     def elseif_statement(self, ast, code):
         """
-
+        The elseif part of an if statement, essentially
+        this is the same as an if statement but without
+        the elseif or else part.
+        
+        {elseif expression (operator expression)}
         """        
         code = "%s{%s elseif " % (
             code,
@@ -467,6 +505,7 @@ class TreeWalker(object):
         
     def else_statement(self, ast, code):
         """
+        The else part of an if statement.
         """
              
         code = "%s{%s else %s}" % (
@@ -487,6 +526,7 @@ class TreeWalker(object):
         
     def operator(self, ast, code):
         """
+        Operators in smarty.
         """
         
         # Evaluate the different types of expressions.
@@ -509,6 +549,7 @@ class TreeWalker(object):
             
     def gte_operator(self, ast, code):
         """
+        >= operator in Smarty.
         """
         code = '%s >= ' % (
             code
@@ -518,6 +559,7 @@ class TreeWalker(object):
         
     def lte_operator(self, ast, code):
         """
+        <= operator in smarty.
         """
         code = '%s <= ' % (
             code
@@ -527,6 +569,7 @@ class TreeWalker(object):
         
     def lt_operator(self, ast, code):
         """
+        < operator in smarty.
         """
         code = '%s < ' % (
             code
@@ -536,6 +579,7 @@ class TreeWalker(object):
         
     def gt_operator(self, ast, code):
         """
+        > operator in smarty.
         """
         code = '%s > ' % (
             code
@@ -545,6 +589,7 @@ class TreeWalker(object):
         
     def ne_operator(self, ast, code):
         """
+        ne, neq, != opeartor in Smarty.
         """
         code = '%s != ' % (
             code
@@ -554,6 +599,7 @@ class TreeWalker(object):
     
     def and_operator(self, ast, code):
         """
+        &&, and operator in Smarty.
         """
         code = '%s and ' % (
             code
@@ -563,6 +609,7 @@ class TreeWalker(object):
         
     def or_operator(self, ast, code):
         """
+        ||, or, operator in Smarty.
         """
         code = '%s or ' % (
             code
@@ -572,6 +619,7 @@ class TreeWalker(object):
         
     def equals_operator(self, ast, code):
         """
+        eq, == opeartor in Smarty.
         """
         code = '%s == ' % (
             code
@@ -581,6 +629,9 @@ class TreeWalker(object):
     
     def expression(self, ast, code):
         """
+        A top level expression in Smarty that statements
+        are built out of mostly expressions and/or symbols (which are
+        encompassed in the expression type.
         """
         # Evaluate the different types of expressions.
         expression = self.__walk_tree (
@@ -611,6 +662,9 @@ class TreeWalker(object):
         
     def object_dereference(self, ast, code):
         """
+        An object dereference expression in Smarty:
+        
+        foo.bar
         """
         handlers = {
             'expression': self.expression,
@@ -631,6 +685,9 @@ class TreeWalker(object):
         
     def array(self, ast, code):
         """
+        An array expression in Smarty:
+        
+        foo[bar]
         """
         handlers = {
             'expression': self.expression,
@@ -654,12 +711,17 @@ class TreeWalker(object):
     
     def string(self, ast, code):
         """
+        A string in Smarty.
         """
         return "%s%s" % (code, ''.join(ast))
         
     def symbol(self, ast, code):
         """
+        A symbol (variable) in Smarty, e.g,
         
+        !foobar
+        foo_bar
+        foo3
         """
         
         # Assume no $ on the symbol.
@@ -682,6 +744,7 @@ class TreeWalker(object):
         
     def __walk_tree(self, handlers, ast, code):
         """
+        Tree walking helper function.
         """
         for k, v in ast:
             if handlers.has_key(k):

@@ -35,6 +35,8 @@ def comment():              return re.compile("{\*.*?\*}", re.S)
 
 def literal():              return '{', keyword('literal'), '}', re.compile(".*{/literal}", re.S)
 
+def junk():                 return -1, [' ', '\n', '\t']
+
 """
 Logical operators.
 """
@@ -69,7 +71,7 @@ def dollar():               return '$'
 
 def not_operator():         return '!'
 
-def symbol():               return re.compile(r'[ \n\s]*'), 0, not_operator, 0, dollar, re.compile(r'[\w\-\+]+')
+def symbol():               return -1, [' ', '\n', '\t'], 0, not_operator, 0, dollar, re.compile(r'[\w\-\+]+')
 
 def array():                return symbol, "[", 0, expression, "]"
 
@@ -92,17 +94,17 @@ def foreachelse_statement():return '{', keyword('foreachelse'), '}', -1, smarty_
 
 def print_statement():      return '{', 0, 'e ', expression, '}'
 
-def function_parameter():   return symbol, '=', expression, 0, ' '
+def function_parameter():   return symbol, '=', expression, junk
 
 def function_statement():   return '{', symbol, -2, function_parameter, '}'
 
-def for_from():             return 0, ' ', keyword('from'), '=', 0, ['"', '\''], expression, 0, ['"', '\'']
+def for_from():             return junk, keyword('from'), '=', 0, ['"', '\''], expression, 0, ['"', '\''], junk
 
-def for_item():             return 0, ' ', keyword('item'), '=', 0, ['"', '\''], symbol, 0, ['"', '\'']
+def for_item():             return junk, keyword('item'), '=', 0, ['"', '\''], symbol, 0, ['"', '\''], junk
 
-def for_name():             return 0, ' ', keyword('name'), '=', 0, ['"', '\''], symbol, 0, ['"', '\'']
+def for_name():             return junk, keyword('name'), '=', 0, ['"', '\''], symbol, 0, ['"', '\''], junk
 
-def for_key():              return 0, ' ', keyword('key'), '=', 0, ['"', '\''], symbol, 0, ['"', '\'']
+def for_key():              return junk, keyword('key'), '=', 0, ['"', '\''], symbol, 0, ['"', '\''], junk
 
 def elseif_statement():     return '{', keyword('elseif'), expression, -1, (operator, expression), '}', -1, smarty_language
 

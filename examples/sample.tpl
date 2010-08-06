@@ -1,5 +1,3 @@
-{if foo and awesome.string|banana:"foo\" $a"}
-bar
-{elseif awesome.sauce[1] and blue and 'hello'}
+{if !foo or foo.bar or foo|bar:foo['hello']}
 foo
 {/if}
