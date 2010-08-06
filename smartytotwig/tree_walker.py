@@ -81,8 +81,9 @@ class TreeWalker(object):
         drop the {literal} tags because Twig
         is less ambiguous.
         """
-        literal_string = ast[0]
+        literal_string = ast
         literal_string = literal_string.replace('{/literal}', '')
+        literal_string = literal_string.replace('{literal}', '')
         
         code = "%s%s" % (
             code,

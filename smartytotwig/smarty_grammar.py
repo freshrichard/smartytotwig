@@ -33,7 +33,7 @@ def content():              return re.compile(r'[^{]+')
 
 def comment():              return re.compile("{\*.*?\*}", re.S)
 
-def literal():              return '{', keyword('literal'), '}', re.compile(".*{/literal}", re.S)
+def literal():              return re.compile("{literal}.*?{/literal}", re.S)
 
 def junk():                 return -1, [' ', '\n', '\t']
 
@@ -115,4 +115,4 @@ def for_statement():        return '{', keyword('foreach'), -1, [for_from, for_i
 """
 Finally, the actual language description.
 """
-def smarty_language():      return -2, [if_statement, for_statement, function_statement, comment, literal, print_statement, content]
+def smarty_language():      return -2, [literal, if_statement, for_statement, function_statement, comment, print_statement, content]
