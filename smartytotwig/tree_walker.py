@@ -427,7 +427,9 @@ class TreeWalker(object):
         code = self.__walk_tree (
             {
                 'expression': self.expression,
-                'operator': self.operator
+                'operator': self.operator,
+                'right_paren': None,
+                'left_paren': None
             },
             ast,
             code
@@ -482,7 +484,9 @@ class TreeWalker(object):
         code = self.__walk_tree (
             {
                 'expression': self.expression,
-                'operator': self.operator
+                'operator': self.operator,
+                'right_paren': None,
+                'left_paren': None
             },
             ast,
             code
@@ -749,10 +753,20 @@ class TreeWalker(object):
         """
         for k, v in ast:
             if handlers.has_key(k):
-                if k == 'comment':
-                    code = "%s%s" % (
+                if k == 'right_paren':
+                    code = "%s)" % (
+                        code
+                    )
+                elif k == 'left_paren':
+                    code = "%s(" % (
+                        code
+                    )
+                elif k == 'comment':
+                    
+                    # Comments in Twig have {# not {*
+                    code = "{#%s%s#}" % (
                         code,
-                        v
+                        v[2:len(v) - 2]
                     )
                 else:
                     code = handlers[k](v, code)

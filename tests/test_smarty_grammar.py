@@ -41,6 +41,17 @@ class TestSmartyGrammar(unittest.TestCase):
         tree_walker = TreeWalker(ast)
         self.assertEqual(tree_walker.code, "{% if foo|bar(3) or not foo[3] %}\nbar\n{% elseif awesome.sauce[1] and blue and 'hello' %}\nfoo\n{% else %}bar{% endif %}")
         
+        # Test an an if statement with parenthesis.
+        ast = smartytotwig.parse_string("{if (foo and bar) or foo and (bar or (foo and bar))}\nbar\n{else}\nfoo{/if}")
+        tree_walker = TreeWalker(ast)
+        self.assertEqual(tree_walker.code, "{% if (foo and bar) or foo and (bar or (foo and bar)) %}\nbar\n{% else %}\nfoo{% endif %}")
+
+        # Test an an elseif statement with parenthesis.
+        ast = smartytotwig.parse_string("{if foo}\nbar\n{elseif (foo and bar) or foo and (bar or (foo and bar))}\nfoo{/if}")
+        tree_walker = TreeWalker(ast)
+        self.assertEqual(tree_walker.code, "{% if foo %}\nbar\n{% elseif (foo and bar) or foo and (bar or (foo and bar)) %}\nfoo{% endif %}")
+
+        
     def test_function_statement(self):
         """
         Test Smarty's function? statement:

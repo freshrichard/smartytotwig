@@ -56,6 +56,10 @@ def lte_operator():         return ['<=']
 
 def gte_operator():         return ['>=']
 
+def right_paren():          return junk, ')'
+
+def left_paren():           return junk, '('
+
 def operator():             return 0, ' ', [and_operator, equals_operator, gte_operator, lte_operator, lt_operator, gt_operator, ne_operator, or_operator]
 
 """
@@ -106,9 +110,9 @@ def for_name():             return junk, keyword('name'), '=', 0, ['"', '\''], s
 
 def for_key():              return junk, keyword('key'), '=', 0, ['"', '\''], symbol, 0, ['"', '\''], junk
 
-def elseif_statement():     return '{', keyword('elseif'), expression, -1, (operator, expression), '}', -1, smarty_language
+def elseif_statement():     return '{', keyword('elseif'), -1, left_paren, expression, -1, right_paren, -1, (operator, -1, left_paren, expression, -1, right_paren), '}', -1, smarty_language
 
-def if_statement():         return '{', keyword('if'), expression, -1, (operator, expression), '}', -1, smarty_language, -1, [else_statement, elseif_statement], '{/', keyword('if'), '}'
+def if_statement():         return '{', keyword('if'), -1, left_paren, expression, -1, right_paren, -1, (operator, -1, left_paren, expression, -1, right_paren), '}', -1, smarty_language, -1, [else_statement, elseif_statement], '{/', keyword('if'), '}'
 
 def for_statement():        return '{', keyword('foreach'), -1, [for_from, for_item, for_name, for_key], '}', -1, smarty_language, 0, foreachelse_statement, '{/', keyword('foreach'), '}'
 
