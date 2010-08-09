@@ -94,7 +94,7 @@ class TestSmartyGrammar(unittest.TestCase):
         # Test a for statement with a foreachelse clause.
         ast = smartytotwig.parse_string("{foreach item='bar'    name=snuh key=\"foobar\" from=foo.bar[2]|hello:\"world\":\" $hey \" }bar{foreachelse}{if !foo}bar{/if}hello{/foreach}")
         tree_walker = TreeWalker(ast)
-        self.assertEqual(tree_walker.code, "{% for bar in foo.bar[2]|hello(\"world\", \" %s \"|format(hey)) %}bar{% foreachelse %}{% if not foo %}bar{% endif %}hello{% endfor %}")
+        self.assertEqual(tree_walker.code, "{% for bar in foo.bar[2]|hello(\"world\", \" %s \"|format(hey)) %}bar{% else %}{% if not foo %}bar{% endif %}hello{% endfor %}")
 
 if __name__ == '__main__':
     unittest.main()

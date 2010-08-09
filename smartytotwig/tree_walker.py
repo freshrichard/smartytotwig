@@ -40,7 +40,7 @@ class TreeWalker(object):
     }
     
     keywords = {
-        'foreachelse': '{% foreachelse %}',
+        'foreachelse': '{% else %}',
         'else': '{% else %}',
     }
     
