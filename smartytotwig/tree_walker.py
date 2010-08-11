@@ -764,7 +764,7 @@ class TreeWalker(object):
                 elif k == 'comment':
                     
                     # Comments in Twig have {# not {*
-                    code = "{#%s%s#}" % (
+                    code = "%s{#%s#}" % (
                         code,
                         v[2:len(v) - 2]
                     )
