@@ -24,7 +24,8 @@ THE SOFTWARE.
 import optparse, sys, smartytotwig
 from smartytotwig.tree_walker import TreeWalker
 
-def main():    
+def main():
+    
     opt1 = optparse.make_option(
         "-s",
         "--smarty-file",
