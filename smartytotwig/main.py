@@ -56,7 +56,6 @@ def main():
         f.close()
     
         print 'Template outputted to %s' % options.target
-    
                 
 if __name__ == "__main__":
     main()

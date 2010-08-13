@@ -14,7 +14,7 @@ setup(name="smartytotwig",
       author_email="coe@freshbooks.com",
       entry_points={
           'console_scripts': [
-              'smartytotwig = smartytotwig.__main__:main'
+              'smartytotwig = smartytotwig.main:main'
           ]
       },
       url="git@github.com:freshbooks/smartytotwig.git",
