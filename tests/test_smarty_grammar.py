@@ -6,16 +6,6 @@ class TestSmartyGrammar(unittest.TestCase):
     It's easy to screw up other rules when modifying the underlying grammar.
     These unit tests test various smarty statements, to make refactoring the grammar more sane.
     """
-
-    def test_sample(self):
-           """
-           Runs and prints out the sample.tpl file, this is used
-           during debugging.
-           """
-           ast = smartytotwig.parse_file('examples/sample.tpl')
-           print ast
-           tree_walker = TreeWalker(ast)
-           print tree_walker.code
    
     def test_if_statement(self):
         """

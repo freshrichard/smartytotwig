@@ -21,14 +21,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
-import optparse, sys
+import optparse, sys, smartytotwig
+from smartytotwig.tree_walker import TreeWalker
 
 opt1 = optparse.make_option(
     "-s",
     "--smarty-file",
     action="store",
     dest="source",
-    help="Path to the source Smarty template file."
+    help="Path to the source Smarty file."
 )
 
 opt2 = optparse.make_option(
@@ -37,11 +38,20 @@ opt2 = optparse.make_option(
     action="store",
     dest="target",
     help="Location of the Twig output file."
-)
+)    
                 
 if __name__ == "__main__":
-    parser = optparse.OptionParser()
+    parser = optparse.OptionParser(usage='smartytotwig --smarty-file=<SOURCE TEMPLATE> --twig-file=<OUTPUT TEMPLATE>')
     parser.add_option(opt1)
     parser.add_option(opt2)
     (options, args) = parser.parse_args(sys.argv)
-    print options
+                
+    if options.source and options.target:
+        ast = smartytotwig.parse_file(options.source)
+        tree_walker = TreeWalker(ast)
+                
+        f = open(options.target, 'w+')
+        f.write(tree_walker.code)
+        f.close()
+        
+        print 'Template outputted to %s' % options.target
