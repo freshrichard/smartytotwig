@@ -17,4 +17,7 @@
             <td colspan="2">No records</td>
         </tr>
     {/foreach}
+	{if $foo|@count == 0}
+		Woo
+	{/if}
 </table>

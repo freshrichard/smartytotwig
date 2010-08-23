@@ -738,6 +738,8 @@ class TreeWalker(object):
                 code = "%snot " % (
                     code
                 )
+            elif ast[0][0] == 'at_operator':
+              pass # Nom nom, at operators are not supported in Twig
         
         # Maybe there was a $ on the symbol?.
         if len(ast) > 1:
