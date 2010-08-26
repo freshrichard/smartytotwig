@@ -44,10 +44,18 @@ class TreeWalker(object):
         'else': '{% else %}',
     }
     
-    def __init__(self, ast):
+    def __init__(self, ast, twig_extension="", twig_path=""):
         """
         The AST structure is created by pyPEG.
         """
+        self.twig_extension = 'twig'
+        self.twig_path = ''
+        
+        if twig_extension:
+           self.twig_extension = twig_extension
+           
+        if twig_path:
+            self.twig_path = twig_path
         
         # Top level handler for walking the tree.
         self.code = self.smarty_language(ast, '')        
@@ -171,8 +179,7 @@ class TreeWalker(object):
         """
         Smarty functions are mapped to a modifier in
         Twig with a hash as input.
-        """
-        
+        """        
         # The variable that starts a function statement.
         function_name = self.__walk_tree (
             {
@@ -203,6 +210,24 @@ class TreeWalker(object):
             )
             
             function_params[symbol] = expression
+        
+        # Deal with the special case of an include function in
+        # smarty this should be mapped onto Twig's include tag.
+        if function_name == 'include' and function_params.has_key('file'):
+            tokens = function_params['file'].split('/')
+            file_name = tokens[len(tokens) - 1]
+            file_name = "%s/%s.%s" % (
+                self.twig_path,
+                re.sub(r'\..*$', '', file_name),
+                self.twig_extension
+            )
+            code = "%s{%s include \"%s\" %s}" % (
+                code,
+                '%',
+                file_name,
+                '%'
+            )
+            return code
             
         # Now create a dictionary string from the paramters.
         function_params_string = '['
